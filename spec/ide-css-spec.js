@@ -108,3 +108,39 @@ describe("ide-css adapter", () => {
     ]);
   });
 });
+
+describe("ide-css feature contracts", () => {
+  const features = [
+    "diagnostics",
+    "autocomplete",
+    "hover",
+    "definition",
+    "references",
+    "symbols",
+    "outline",
+    "format",
+    "rename",
+    "codeActions",
+  ];
+  const definitions = require("../package.json").configSchema.features.properties;
+
+  beforeEach(async () => {
+    await lumine.packages.activatePackage("ide-css");
+  });
+
+  afterEach(async () => {
+    for (const feature of features) lumine.config.unset(`ide-css.features.${feature}`);
+    await lumine.packages.deactivatePackage("ide-css");
+  });
+
+  for (const feature of features) {
+    it(`exposes ${feature} as an independent enabled-by-default switch`, () => {
+      expect(definitions[feature].type).toBe("boolean");
+      expect(definitions[feature].default).toBe(true);
+      const keyPath = `ide-css.features.${feature}`;
+      expect(lumine.config.get(keyPath)).toBe(true);
+      lumine.config.set(keyPath, false);
+      expect(lumine.config.get(keyPath)).toBe(false);
+    });
+  }
+});
