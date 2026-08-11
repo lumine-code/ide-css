@@ -1,0 +1,110 @@
+const fs = require("fs");
+const { resolveServer } = require("../lib/server");
+const main = require("../lib/main");
+
+const registerAdapter = () => {
+  let adapter;
+  const disposable = main.consumeIdeClient({
+    registerAdapter(registered) {
+      adapter = registered;
+      return { dispose() {} };
+    },
+    getSessions: () => [],
+    restart: async () => {},
+  });
+  return { adapter, disposable };
+};
+
+describe("ide-css server resolution", () => {
+  it("prefers the configured path", async () => {
+    const launch = await resolveServer(process.execPath);
+    expect(launch.command).toBe(process.execPath);
+    expect(launch.args).toEqual(["--stdio"]);
+  });
+
+  it("falls back to the bundled server module", async () => {
+    const launch = await resolveServer("");
+    expect(launch.command).toBe(process.execPath);
+    expect(fs.existsSync(launch.args[0])).toBe(true);
+    expect(launch.args[1]).toBe("--stdio");
+    expect(launch.env.ELECTRON_RUN_AS_NODE).toBe("1");
+  });
+});
+
+describe("ide-css adapter", () => {
+  let adapter;
+  let disposable;
+
+  beforeEach(async () => {
+    await lumine.packages.activatePackage("ide-css");
+    ({ adapter, disposable } = registerAdapter());
+  });
+
+  afterEach(async () => {
+    disposable.dispose();
+    await lumine.packages.deactivatePackage("ide-css");
+  });
+
+  it("registers CSS, SCSS and Less with their protocol language IDs", async () => {
+    expect(adapter.id).toBe("ide-css");
+    expect(adapter.grammarScopes).toEqual(["source.css", "source.css.scss", "source.css.less"]);
+    expect(adapter.languageIdForScope("source.css")).toBe("css");
+    expect(adapter.languageIdForScope("source.css.scss")).toBe("scss");
+    expect(adapter.languageIdForScope("source.css.less")).toBe("less");
+    expect(adapter.settingsKeyPaths).toEqual(["ide-css"]);
+    const launch = await adapter.resolveServer({ rootPath: __dirname });
+    expect(launch.cwd).toBe(__dirname);
+    expect(launch.transport).toBe("stdio");
+  });
+
+  it("declares supported URI schemes and the static formatter capability", () => {
+    expect(adapter.getInitializationOptions()).toEqual({
+      provideFormatter: true,
+      handledSchemas: ["file", "http", "https"],
+    });
+    lumine.config.set("ide-css.features.format", false);
+    expect(adapter.getInitializationOptions().provideFormatter).toBe(false);
+  });
+
+  it("returns compatibility-shaped scoped settings for all three languages", () => {
+    lumine.config.set("ide-css.completion.completePropertyWithSemicolon", false);
+    lumine.config.set("ide-css.hover.references", false);
+    lumine.config.set("ide-css.lint.unknownProperties", "error");
+    lumine.config.set("ide-css.lint.validProperties", ["custom-prop"]);
+    lumine.config.set("ide-css.languages.scss", false);
+
+    const css = adapter.getWorkspaceConfiguration("css");
+    expect(css.validate).toBe(true);
+    expect(css.completion.completePropertyWithSemicolon).toBe(false);
+    expect(css.hover.references).toBe(false);
+    expect(css.lint.unknownProperties).toBe("error");
+    expect(css.lint.validProperties).toEqual(["custom-prop"]);
+    expect(adapter.getWorkspaceConfiguration("scss").validate).toBe(false);
+    expect(adapter.getWorkspaceConfiguration("less").validate).toBe(true);
+    expect(adapter.getWorkspaceConfiguration()).toEqual(adapter.getSettings());
+    expect(adapter.getWorkspaceConfiguration("unknown")).toBeUndefined();
+  });
+
+  it("turns all three validators off with the diagnostics feature", () => {
+    lumine.config.set("ide-css.features.diagnostics", false);
+    expect(adapter.getSettings().css.validate).toBe(false);
+    expect(adapter.getSettings().scss.validate).toBe(false);
+    expect(adapter.getSettings().less.validate).toBe(false);
+  });
+
+  it("offers switches for exactly the capabilities consumed by the editor", () => {
+    const { configSchema } = require("../package.json");
+    expect(Object.keys(configSchema.features.properties)).toEqual([
+      "diagnostics",
+      "autocomplete",
+      "hover",
+      "definition",
+      "references",
+      "symbols",
+      "outline",
+      "format",
+      "rename",
+      "codeActions",
+    ]);
+  });
+});

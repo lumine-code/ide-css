@@ -1,0 +1,284 @@
+{
+  "name": "ide-css",
+  "author": "lumine-code",
+  "description": "CSS, SCSS and Less language-server adapter.",
+  "repository": "https://github.com/lumine-code/ide-css",
+  "bugs": {
+    "url": "https://github.com/lumine-code/ide-css/issues"
+  },
+  "keywords": [
+    "language-server",
+    "lsp",
+    "css",
+    "scss",
+    "less",
+    "web",
+    "intellisense"
+  ],
+  "version": "1.0.0",
+  "license": "MIT",
+  "engines": {
+    "lumine": "^1.0.0"
+  },
+  "main": "./lib/main",
+  "files": [
+    "lib",
+    "spec"
+  ],
+  "scripts": {
+    "test": "lumine --test spec",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "consumedServices": {
+    "ide-client": {
+      "versions": {
+        "^1.0.0": "consumeIdeClient"
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-langservers-extracted": "4.10.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-n": "^18.2.2",
+    "globals": "^17.9.0",
+    "prettier": "^3.9.6",
+    "vscode-jsonrpc": "^9.0.1"
+  },
+  "configSchema": {
+    "serverPath": {
+      "title": "Server Path",
+      "description": "Absolute path to a `vscode-css-language-server` executable. Leave empty to use the bundled server.",
+      "type": "string",
+      "default": ""
+    },
+    "features": {
+      "title": "Features",
+      "description": "Which parts of the stylesheet server the editor uses. Turning one off hands it to the next server serving the same file.",
+      "type": "object",
+      "properties": {
+        "diagnostics": {
+          "title": "Diagnostics",
+          "description": "Report syntax and lint problems in the linter.",
+          "type": "boolean",
+          "default": true
+        },
+        "autocomplete": {
+          "title": "Autocomplete",
+          "description": "Offer selectors, properties, values and paths.",
+          "type": "boolean",
+          "default": true
+        },
+        "hover": {
+          "title": "Hover",
+          "description": "Show CSS documentation and browser information on hover.",
+          "type": "boolean",
+          "default": true
+        },
+        "definition": {
+          "title": "Go To Definition",
+          "description": "Jump from variables and custom properties to their definitions.",
+          "type": "boolean",
+          "default": true
+        },
+        "references": {
+          "title": "Find References",
+          "description": "Find stylesheet variable and custom-property references.",
+          "type": "boolean",
+          "default": true
+        },
+        "symbols": {
+          "title": "Symbols",
+          "description": "Serve stylesheet symbols to go-to-symbol.",
+          "type": "boolean",
+          "default": true
+        },
+        "outline": {
+          "title": "Outline",
+          "description": "Fill the outline panel with selectors and declarations.",
+          "type": "boolean",
+          "default": true
+        },
+        "format": {
+          "title": "Format",
+          "description": "Format whole stylesheets and selected ranges.",
+          "type": "boolean",
+          "default": true
+        },
+        "rename": {
+          "title": "Rename",
+          "description": "Rename variables and custom properties with all references.",
+          "type": "boolean",
+          "default": true
+        },
+        "codeActions": {
+          "title": "Code Actions",
+          "description": "Offer quick fixes for misspelled CSS properties.",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "languages": {
+      "title": "Languages",
+      "description": "Enable validation independently for each supported stylesheet syntax.",
+      "type": "object",
+      "properties": {
+        "css": {
+          "title": "Validate CSS",
+          "type": "boolean",
+          "default": true
+        },
+        "scss": {
+          "title": "Validate SCSS",
+          "type": "boolean",
+          "default": true
+        },
+        "less": {
+          "title": "Validate Less",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "completion": {
+      "title": "Completion",
+      "description": "How stylesheet completion items are generated.",
+      "type": "object",
+      "properties": {
+        "triggerPropertyValueCompletion": {
+          "title": "Complete Property Values",
+          "description": "Automatically offer values after a property name and colon.",
+          "type": "boolean",
+          "default": true
+        },
+        "completePropertyWithSemicolon": {
+          "title": "Insert Semicolons",
+          "description": "Include a trailing semicolon when completing a property declaration.",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "hover": {
+      "title": "Hover",
+      "description": "Content included in stylesheet hover results.",
+      "type": "object",
+      "properties": {
+        "documentation": {
+          "title": "Documentation",
+          "description": "Include prose documentation for CSS features.",
+          "type": "boolean",
+          "default": true
+        },
+        "references": {
+          "title": "References",
+          "description": "Include links to reference documentation.",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "lint": {
+      "title": "Lint",
+      "description": "Shared lint levels for CSS, SCSS and Less. Language defaults apply to rules not listed here.",
+      "type": "object",
+      "properties": {
+        "unknownProperties": {
+          "title": "Unknown Properties",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "unknownAtRules": {
+          "title": "Unknown At-Rules",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "duplicateProperties": {
+          "title": "Duplicate Properties",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "emptyRules": {
+          "title": "Empty Rules",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "vendorPrefix": {
+          "title": "Missing Standard Property",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "important": {
+          "title": "Avoid Important",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "float": {
+          "title": "Avoid Float",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "idSelector": {
+          "title": "Avoid ID Selectors",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "validProperties": {
+          "title": "Additional Valid Properties",
+          "description": "Property names accepted by the unknown-properties rule.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      }
+    }
+  }
+}
