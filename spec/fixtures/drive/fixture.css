@@ -1,0 +1,15 @@
+@import "./base.css";
+
+:root {
+  --brand: #ff0000;
+}
+
+.card {
+  color: var(--brand);
+  display: grid;
+  colr: #00ff00;
+}
+
+.card:hover {
+  color: var(--brand);
+}

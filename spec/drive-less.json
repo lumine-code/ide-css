@@ -1,0 +1,25 @@
+{
+  "name": "ide-css Less matrix",
+  "adapter": "ide-css",
+  "project": "fixtures/drive",
+  "file": "fixtures/drive/fixture.less",
+  "grammarScope": "source.css.less",
+  "checks": [
+    {
+      "name": "Less definition",
+      "method": "textDocument/definition",
+      "position": [2, 11],
+      "expect": { "path": "range.start.line", "equals": 0 }
+    },
+    {
+      "name": "Less symbols",
+      "method": "textDocument/documentSymbol",
+      "expect": { "path": "*.name", "includes": ".card" }
+    },
+    {
+      "name": "Less diagnostics",
+      "method": "textDocument/diagnostic",
+      "expect": { "path": "items", "type": "array" }
+    }
+  ]
+}

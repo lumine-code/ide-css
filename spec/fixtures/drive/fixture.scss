@@ -1,0 +1,7 @@
+$brand: #f00;
+.card {
+  color: $brand;
+  &:hover {
+    color: lighten($brand, 10%);
+  }
+}

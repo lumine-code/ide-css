@@ -1,0 +1,25 @@
+{
+  "name": "ide-css SCSS matrix",
+  "adapter": "ide-css",
+  "project": "fixtures/drive",
+  "file": "fixtures/drive/fixture.scss",
+  "grammarScope": "source.css.scss",
+  "checks": [
+    {
+      "name": "SCSS definition",
+      "method": "textDocument/definition",
+      "position": [2, 11],
+      "expect": { "path": "range.start.line", "equals": 0 }
+    },
+    {
+      "name": "SCSS symbols",
+      "method": "textDocument/documentSymbol",
+      "expect": { "path": "*.name", "includes": ".card" }
+    },
+    {
+      "name": "SCSS diagnostics",
+      "method": "textDocument/diagnostic",
+      "expect": { "path": "items", "type": "array" }
+    }
+  ]
+}

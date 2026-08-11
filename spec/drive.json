@@ -1,0 +1,125 @@
+{
+  "name": "ide-css full feature matrix",
+  "adapter": "ide-css",
+  "project": "fixtures/drive",
+  "file": "fixtures/drive/fixture.css",
+  "grammarScope": "source.css",
+  "checks": [
+    {
+      "name": "diagnostics",
+      "method": "textDocument/diagnostic",
+      "expect": { "path": "items.*.code", "includes": "unknownProperties" }
+    },
+    {
+      "name": "completion",
+      "method": "textDocument/completion",
+      "position": [8, 13],
+      "params": { "context": { "triggerKind": 1 } },
+      "expect": { "path": "items.*.label", "includes": "grid" }
+    },
+    {
+      "name": "hover",
+      "method": "textDocument/hover",
+      "position": [8, 4],
+      "expect": { "path": "contents.value", "matches": "determines the type of box" }
+    },
+    {
+      "name": "document symbols",
+      "method": "textDocument/documentSymbol",
+      "expect": { "path": "*.name", "includes": ".card" }
+    },
+    {
+      "name": "references",
+      "method": "textDocument/references",
+      "position": [7, 15],
+      "params": { "context": { "includeDeclaration": true } },
+      "expect": { "type": "array", "minLength": 3 }
+    },
+    {
+      "name": "definition",
+      "method": "textDocument/definition",
+      "position": [7, 15],
+      "expect": { "path": "range.start.line", "equals": 3 }
+    },
+    {
+      "name": "document highlights",
+      "method": "textDocument/documentHighlight",
+      "position": [7, 15],
+      "expect": { "type": "array", "minLength": 3 }
+    },
+    {
+      "name": "document links",
+      "method": "textDocument/documentLink",
+      "expect": { "path": "*.target", "matches": "base\\.css$" }
+    },
+    {
+      "name": "code actions",
+      "method": "textDocument/codeAction",
+      "paramsFrom": {
+        "range": {
+          "check": "diagnostics",
+          "path": "items",
+          "find": { "path": "code", "equals": "unknownProperties" },
+          "select": "range"
+        },
+        "context.diagnostics": { "check": "diagnostics", "path": "items" }
+      },
+      "expect": { "path": "*.title", "includes": "Rename to 'color'" }
+    },
+    {
+      "name": "rename",
+      "method": "textDocument/rename",
+      "position": [7, 15],
+      "params": { "newName": "--accent" },
+      "expect": { "path": "changes", "type": "object", "minLength": 1 }
+    },
+    {
+      "name": "document colors",
+      "method": "textDocument/documentColor",
+      "expect": { "type": "array", "minLength": 2 }
+    },
+    {
+      "name": "color presentations",
+      "method": "textDocument/colorPresentation",
+      "paramsFrom": {
+        "color": { "check": "document colors", "path": "0.color" },
+        "range": { "check": "document colors", "path": "0.range" }
+      },
+      "expect": { "path": "*.label", "includes": "#ff0000" }
+    },
+    {
+      "name": "folding ranges",
+      "method": "textDocument/foldingRange",
+      "expect": { "type": "array", "minLength": 3 }
+    },
+    {
+      "name": "selection ranges",
+      "method": "textDocument/selectionRange",
+      "params": { "positions": [{ "line": 7, "character": 15 }] },
+      "expect": { "path": "0.parent.parent", "type": "object" }
+    },
+    {
+      "name": "formatting",
+      "method": "textDocument/formatting",
+      "params": { "options": { "tabSize": 4, "insertSpaces": true } },
+      "expect": { "type": "array", "minLength": 1 }
+    },
+    {
+      "name": "range formatting",
+      "method": "textDocument/rangeFormatting",
+      "params": {
+        "range": {
+          "start": { "line": 2, "character": 0 },
+          "end": { "line": 14, "character": 1 }
+        },
+        "options": { "tabSize": 4, "insertSpaces": true }
+      },
+      "expect": { "type": "array", "minLength": 1 }
+    },
+    {
+      "name": "restart lifecycle",
+      "kind": "restart",
+      "expect": { "path": "current", "equals": "running" }
+    }
+  ]
+}
