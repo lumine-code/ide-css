@@ -7,6 +7,7 @@ Registers the CSS server from [vscode-langservers-extracted](https://github.com/
 ## Features
 
 - **Bundled server**: ships an exact server version, with an optional custom executable path.
+- **Managed upgrade**: installs a newer server from npm when you want one, and removing it returns to the bundled copy.
 - **Three syntaxes**: serves CSS, SCSS and Less with their native protocol language IDs.
 - **Validation and fixes**: reports syntax and configurable lint problems through LSP pull diagnostics and offers property-name quick fixes.
 - **Navigation and refactoring**: finds definitions and references and renames variables or custom properties.
