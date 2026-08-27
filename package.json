@@ -60,65 +60,76 @@
     "features": {
       "title": "Features",
       "description": "Which parts of the stylesheet server the editor uses. Turning one off hands it to the next server serving the same file.",
+      "scopeResolution": "grammar",
       "type": "object",
       "properties": {
         "diagnostics": {
           "title": "Diagnostics",
           "description": "Report syntax and lint problems in the linter.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "autocomplete": {
           "title": "Autocomplete",
           "description": "Offer selectors, properties, values and paths.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "hover": {
           "title": "Hover",
           "description": "Show CSS documentation and browser information on hover.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "definition": {
           "title": "Go To Definition",
           "description": "Jump from variables and custom properties to their definitions.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "references": {
           "title": "Find References",
           "description": "Find stylesheet variable and custom-property references.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "symbols": {
           "title": "Symbols",
           "description": "Serve stylesheet symbols to go-to-symbol.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "outline": {
           "title": "Outline",
           "description": "Fill the outline panel with selectors and declarations.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "format": {
           "title": "Format",
           "description": "Format whole stylesheets and selected ranges.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "rename": {
           "title": "Rename",
           "description": "Rename variables and custom properties with all references.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         },
         "codeActions": {
           "title": "Code Actions",
           "description": "Offer quick fixes for misspelled CSS properties.",
+          "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
         }
