@@ -100,14 +100,7 @@
         },
         "symbols": {
           "title": "Symbols",
-          "description": "Serve stylesheet symbols to go-to-symbol.",
-          "scopeResolution": "grammar",
-          "type": "boolean",
-          "default": true
-        },
-        "outline": {
-          "title": "Outline",
-          "description": "Fill the outline panel with selectors and declarations.",
+          "description": "Serve stylesheet symbols to navigation features.",
           "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
