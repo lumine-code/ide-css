@@ -69,6 +69,7 @@ describe("ide-css adapter", () => {
     expect(adapter.languageIdForScope("source.css.scss")).toBe("scss");
     expect(adapter.languageIdForScope("source.css.less")).toBe("less");
     expect(adapter.settingsKeyPaths).toEqual(["ide-css"]);
+    expect(adapter.restartKeyPaths).toEqual(["ide-css.serverPath", "ide-css.features.format"]);
     const launch = await adapter.resolveServer({ rootPath: __dirname });
     expect(launch.cwd).toBe(__dirname);
     expect(launch.transport).toBe("stdio");
