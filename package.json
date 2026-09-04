@@ -9,7 +9,7 @@
   "keywords": [
     "language-server",
     "lsp",
-    "css",
+    "stylesheet",
     "scss",
     "less",
     "web",
@@ -56,6 +56,15 @@
       "description": "Absolute path to a `vscode-css-language-server` executable. Leave empty to use the bundled server.",
       "type": "string",
       "default": ""
+    },
+    "customData": {
+      "title": "Custom Data",
+      "description": "CSS custom-data files or URLs that describe additional properties, at-rules, pseudo-classes and pseudo-elements. Relative paths are resolved from the project root.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     },
     "features": {
       "title": "Features",
@@ -135,16 +144,19 @@
       "properties": {
         "css": {
           "title": "Validate CSS",
+          "description": "Report syntax and lint diagnostics in CSS files.",
           "type": "boolean",
           "default": true
         },
         "scss": {
           "title": "Validate SCSS",
+          "description": "Report syntax and lint diagnostics in SCSS files.",
           "type": "boolean",
           "default": true
         },
         "less": {
           "title": "Validate Less",
+          "description": "Report syntax and lint diagnostics in Less files.",
           "type": "boolean",
           "default": true
         }
@@ -193,18 +205,20 @@
       "description": "Shared lint levels for CSS, SCSS and Less. Language defaults apply to rules not listed here.",
       "type": "object",
       "properties": {
-        "unknownProperties": {
-          "title": "Unknown Properties",
+        "compatibleVendorPrefixes": {
+          "title": "Compatible Vendor Prefixes",
+          "description": "Require all compatible vendor-prefixed properties when one prefix is used.",
           "type": "string",
           "enum": [
             "ignore",
             "warning",
             "error"
           ],
-          "default": "warning"
+          "default": "ignore"
         },
-        "unknownAtRules": {
-          "title": "Unknown At-Rules",
+        "vendorPrefix": {
+          "title": "Missing Standard Property",
+          "description": "Require the standard property alongside a vendor-prefixed property.",
           "type": "string",
           "enum": [
             "ignore",
@@ -215,6 +229,7 @@
         },
         "duplicateProperties": {
           "title": "Duplicate Properties",
+          "description": "Report duplicate property declarations in one rule.",
           "type": "string",
           "enum": [
             "ignore",
@@ -225,6 +240,7 @@
         },
         "emptyRules": {
           "title": "Empty Rules",
+          "description": "Report rules that contain no declarations.",
           "type": "string",
           "enum": [
             "ignore",
@@ -233,8 +249,130 @@
           ],
           "default": "warning"
         },
-        "vendorPrefix": {
-          "title": "Missing Standard Property",
+        "importStatement": {
+          "title": "Import Statements",
+          "description": "Report import statements because they prevent resources from loading in parallel.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "boxModel": {
+          "title": "Box Model",
+          "description": "Report width or height declarations combined with padding or borders.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "universalSelector": {
+          "title": "Universal Selector",
+          "description": "Report use of the universal selector.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "zeroUnits": {
+          "title": "Units on Zero",
+          "description": "Report units that are unnecessary on zero values.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "fontFaceProperties": {
+          "title": "Font Face Properties",
+          "description": "Require `src` and `font-family` in font-face rules.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "hexColorLength": {
+          "title": "Hex Color Length",
+          "description": "Report hexadecimal colors whose length is invalid.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "error"
+        },
+        "argumentsInColorFunction": {
+          "title": "Color Function Arguments",
+          "description": "Report color functions with an invalid number of arguments.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "error"
+        },
+        "unknownProperties": {
+          "title": "Unknown Properties",
+          "description": "Report property names not known to the language service.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "unknownAtRules": {
+          "title": "Unknown At-Rules",
+          "description": "Report at-rules not known to the language service.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "warning"
+        },
+        "ieHack": {
+          "title": "Internet Explorer Hacks",
+          "description": "Report property hacks required only by Internet Explorer 7 and older.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "unknownVendorSpecificProperties": {
+          "title": "Unknown Vendor Properties",
+          "description": "Report unknown vendor-prefixed properties.",
+          "type": "string",
+          "enum": [
+            "ignore",
+            "warning",
+            "error"
+          ],
+          "default": "ignore"
+        },
+        "propertyIgnoredDueToDisplay": {
+          "title": "Properties Ignored by Display",
+          "description": "Report properties that have no effect with the selected display mode.",
           "type": "string",
           "enum": [
             "ignore",
@@ -245,6 +383,7 @@
         },
         "important": {
           "title": "Avoid Important",
+          "description": "Report declarations marked `!important`.",
           "type": "string",
           "enum": [
             "ignore",
@@ -255,6 +394,7 @@
         },
         "float": {
           "title": "Avoid Float",
+          "description": "Report declarations that use floating layout.",
           "type": "string",
           "enum": [
             "ignore",
@@ -265,6 +405,7 @@
         },
         "idSelector": {
           "title": "Avoid ID Selectors",
+          "description": "Report selectors coupled to element IDs.",
           "type": "string",
           "enum": [
             "ignore",

@@ -2,13 +2,14 @@
 
 CSS, SCSS and Less language-server adapter.
 
-Registers the CSS server from [vscode-langservers-extracted](https://github.com/hrsh7th/vscode-langservers-extracted) with the bundled `ide-client` package, providing completion, validation, documentation, navigation, refactoring, colors, links, quick fixes, folding, selection ranges, and formatting for stylesheets.
+Registers the CSS server from [vscode-langservers-extracted](https://github.com/hrsh7th/vscode-langservers-extracted) with the `ide-client` package, providing completion, validation, documentation, navigation, refactoring, colors, links, quick fixes, folding, selection ranges, and formatting for stylesheets.
 
 ## Features
 
 - **Bundled server**: ships an exact server version, with an optional custom executable path.
 - **Managed upgrade**: installs a newer server from npm when you want one, and removing it returns to the bundled copy.
 - **Three syntaxes**: serves CSS, SCSS and Less with their native protocol language IDs.
+- **Custom data**: loads project-defined properties, at-rules, pseudo-classes, and pseudo-elements from CSS custom-data files or URLs.
 - **Validation and fixes**: reports syntax and configurable lint problems through LSP pull diagnostics and offers property-name quick fixes.
 - **Navigation and refactoring**: finds definitions and references and renames variables or custom properties.
 - **Document tools**: provides symbols, outline data, import links, colors, highlights, folding, selection ranges, and formatting.
@@ -17,7 +18,7 @@ Registers the CSS server from [vscode-langservers-extracted](https://github.com/
 
 ## Installation
 
-To install `ide-css` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/ide-css`.
+Install `ide-client` first. Then install `ide-css` from the Install pane of the Lumine settings, or run `lumine --install lumine-code/ide-css`.
 
 ## Services
 

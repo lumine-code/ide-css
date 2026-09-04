@@ -153,6 +153,14 @@ class LiveLspClient {
       (await this.adapter.getWorkspaceConfiguration?.(undefined)) ??
       {};
     this.connection.sendNotification("workspace/didChangeConfiguration", { settings });
+    const initializedNotifications =
+      (await this.adapter.getInitializedNotifications?.({
+        session: this,
+        rootPath: this.rootPath,
+        rootUri,
+      })) || [];
+    for (const { method, params } of initializedNotifications)
+      this.connection.sendNotification(method, params);
     return this.initializeResult;
   }
 

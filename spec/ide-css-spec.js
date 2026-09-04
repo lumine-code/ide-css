@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const { pathToFileURL } = require("url");
 const { resolveServer, managedServer } = require("../lib/server");
 const main = require("../lib/main");
 
@@ -69,19 +71,29 @@ describe("ide-css adapter", () => {
     expect(adapter.languageIdForScope("source.css.scss")).toBe("scss");
     expect(adapter.languageIdForScope("source.css.less")).toBe("less");
     expect(adapter.settingsKeyPaths).toEqual(["ide-css"]);
-    expect(adapter.restartKeyPaths).toEqual(["ide-css.serverPath", "ide-css.features.format"]);
+    expect(adapter.restartKeyPaths).toEqual(["ide-css.serverPath", "ide-css.customData"]);
     const launch = await adapter.resolveServer({ rootPath: __dirname });
     expect(launch.cwd).toBe(__dirname);
     expect(launch.transport).toBe("stdio");
   });
 
-  it("declares supported URI schemes and the static formatter capability", () => {
-    expect(adapter.getInitializationOptions()).toEqual({
+  it("declares supported URI schemes, custom data, and the static formatter capability", () => {
+    lumine.config.set("ide-css.customData", ["config/css-data.json", "https://x.test/css.json"]);
+    expect(adapter.getInitializationOptions({ rootPath: __dirname })).toEqual({
       provideFormatter: true,
       handledSchemas: ["file", "http", "https"],
     });
+    expect(adapter.getInitializedNotifications({ rootPath: __dirname })).toEqual([
+      {
+        method: "css/customDataChanged",
+        params: [
+          pathToFileURL(path.join(__dirname, "config", "css-data.json")).href,
+          "https://x.test/css.json",
+        ],
+      },
+    ]);
     lumine.config.set("ide-css.features.format", false);
-    expect(adapter.getInitializationOptions().provideFormatter).toBe(false);
+    expect(adapter.getInitializationOptions().provideFormatter).toBe(true);
   });
 
   it("returns compatibility-shaped scoped settings for all three languages", () => {
@@ -96,6 +108,8 @@ describe("ide-css adapter", () => {
     expect(css.completion.completePropertyWithSemicolon).toBe(false);
     expect(css.hover.references).toBe(false);
     expect(css.lint.unknownProperties).toBe("error");
+    expect(css.lint.hexColorLength).toBe("error");
+    expect(css.lint.propertyIgnoredDueToDisplay).toBe("warning");
     expect(css.lint.validProperties).toEqual(["custom-prop"]);
     expect(adapter.getWorkspaceConfiguration("scss").validate).toBe(false);
     expect(adapter.getWorkspaceConfiguration("less").validate).toBe(true);
@@ -107,6 +121,16 @@ describe("ide-css adapter", () => {
     lumine.config.set("ide-css.features.diagnostics", false);
     expect(adapter.getSettings().css.validate).toBe(false);
     expect(adapter.getSettings().scss.validate).toBe(false);
+    expect(adapter.getSettings().less.validate).toBe(false);
+  });
+
+  it("preserves grammar-scoped diagnostic overrides", () => {
+    lumine.config.set("ide-css.features.diagnostics", false);
+    lumine.config.set("ide-css.features.diagnostics", true, {
+      scopeSelector: ".source.css.scss",
+    });
+    expect(adapter.getSettings().css.validate).toBe(false);
+    expect(adapter.getSettings().scss.validate).toBe(true);
     expect(adapter.getSettings().less.validate).toBe(false);
   });
 
@@ -123,6 +147,19 @@ describe("ide-css adapter", () => {
       "rename",
       "codeActions",
     ]);
+  });
+
+  it("describes every titled configuration setting", () => {
+    const pkg = require("../package.json");
+    const missing = [];
+    const visit = (value, keyPath = "") => {
+      if (value?.title && !value.description) missing.push(keyPath);
+      for (const [key, child] of Object.entries(value?.properties || {}))
+        visit(child, keyPath ? `${keyPath}.${key}` : key);
+    };
+    visit({ properties: pkg.configSchema });
+    expect(missing).toEqual([]);
+    expect(pkg.keywords.some((keyword) => pkg.name.includes(keyword))).toBe(false);
   });
 });
 

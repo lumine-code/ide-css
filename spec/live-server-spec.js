@@ -236,4 +236,30 @@ describe("ide-css bundled server", () => {
     expect(scssDiagnostics.items).toEqual([]);
     expect(lessDiagnostics.items).toEqual([]);
   });
+
+  it("loads project-relative CSS custom data", async () => {
+    fs.writeFileSync(
+      path.join(rootPath, "css-data.json"),
+      JSON.stringify({
+        version: 1,
+        properties: [{ name: "custom-brand-color", description: "Project brand color." }],
+      }),
+    );
+    lumine.config.set("ide-css.customData", ["css-data.json"]);
+    const filePath = path.join(rootPath, "custom.css");
+    const source = ".card {\n  custom-br\n}\n";
+    fs.writeFileSync(filePath, source);
+    const uri = fileUri(filePath);
+    await client.start();
+    client.open(uri, "css", source);
+
+    const completion = await client.request("textDocument/completion", positionParams(uri, 1, 11));
+    expect(completion.items.map(({ label }) => label)).toContain("custom-brand-color");
+    const resolvedSource = source.replace("custom-br", "custom-brand-color: red;");
+    client.change(uri, resolvedSource);
+    const diagnostics = await client.request("textDocument/diagnostic", {
+      textDocument: { uri },
+    });
+    expect(diagnostics.items).toEqual([]);
+  });
 });
