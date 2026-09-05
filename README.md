@@ -18,7 +18,9 @@ Registers the CSS server from [vscode-langservers-extracted](https://github.com/
 
 ## Installation
 
-Install `ide-client` first. Then install `ide-css` from the Install pane of the Lumine settings, or run `lumine --install lumine-code/ide-css`.
+To install `ide-css` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/ide-css`.
+
+Install `ide-client` first.
 
 ## Services
 
