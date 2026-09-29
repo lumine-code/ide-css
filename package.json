@@ -101,6 +101,13 @@
           "type": "boolean",
           "default": true
         },
+        "signature": {
+          "title": "Signature Help",
+          "description": "Show parameter hints for Sass functions and mixins.",
+          "scopeResolution": "grammar",
+          "type": "boolean",
+          "default": true
+        },
         "definition": {
           "title": "Go To Definition",
           "description": "Jump from variables and custom properties to their definitions.",

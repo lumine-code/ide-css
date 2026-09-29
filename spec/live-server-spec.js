@@ -296,6 +296,22 @@ describe("ide-css bundled server", () => {
     client.change(uri, ".card:ho\n  color: red\n", 3);
     const pseudo = await client.request("textDocument/completion", positionParams(uri, 0, 8));
     expect(pseudo.items.map(({ label }) => label)).toContain(":hover");
+
+    const mixinSource = [
+      "@mixin card($color, $padding: 1rem)",
+      "  color: $color",
+      ".card",
+      "  @include card(red, )",
+      "",
+    ];
+    client.change(uri, mixinSource.join("\n"), 4);
+    expect(capabilities.signatureHelpProvider).toBeDefined();
+    const signature = await client.request(
+      "textDocument/signatureHelp",
+      positionParams(uri, 3, mixinSource[3].indexOf(")")),
+    );
+    expect(signature.signatures[0].label).toBe("card($color, $padding: 1rem)");
+    expect(signature.activeParameter).toBe(1);
   });
 
   it("validates Sass at its original ranges and clears resolved problems", async () => {
