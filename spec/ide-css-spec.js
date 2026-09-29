@@ -1,20 +1,29 @@
 const fs = require("fs");
 const path = require("path");
 const { pathToFileURL } = require("url");
-const { resolveServer, managedServer } = require("../lib/server");
-const main = require("../lib/main");
+const {
+  resolveServer,
+  managedServer,
+  resolveSassServer,
+  managedSassServer,
+} = require("../lib/server");
 
 const registerAdapter = () => {
-  let adapter;
+  const adapters = new Map();
+  const main = lumine.packages.getActivePackage("ide-css").mainModule;
   const disposable = main.consumeIdeClient({
     registerAdapter(registered) {
-      adapter = registered;
+      adapters.set(registered.id, registered);
       return { dispose() {} };
     },
     getSessions: () => [],
     restart: async () => {},
   });
-  return { adapter, disposable };
+  return {
+    adapter: adapters.get("ide-css"),
+    sassAdapter: adapters.get("ide-css-sass"),
+    disposable,
+  };
 };
 
 describe("ide-css server resolution", () => {
@@ -48,15 +57,29 @@ describe("ide-css server resolution", () => {
     expect(managedServer.bundled).toBe(true);
     expect(managedServer.module).toContain("node_modules/");
   });
+
+  it("resolves the indented Sass server independently", async () => {
+    const bundled = await resolveSassServer("");
+    expect(bundled.command).toBe(process.execPath);
+    expect(fs.existsSync(bundled.args[0])).toBe(true);
+    expect(bundled.args[1]).toBe("--stdio");
+    expect(bundled.env.ELECTRON_RUN_AS_NODE).toBe("1");
+    const managed = { modulePath: "/managed/sass.js", version: "9.9.9" };
+    expect((await resolveSassServer("", managed)).args[0]).toBe(managed.modulePath);
+    expect((await resolveSassServer("", managed)).version).toBe(managed.version);
+    expect((await resolveSassServer(process.execPath, managed)).command).toBe(process.execPath);
+    expect(managedSassServer.bundled).toBe(true);
+    expect(managedSassServer.packages).toEqual(["some-sass-language-server"]);
+  });
 });
 
 describe("ide-css adapter", () => {
-  let adapter;
+  let adapter, sassAdapter;
   let disposable;
 
   beforeEach(async () => {
     await lumine.packages.activatePackage("ide-css");
-    ({ adapter, disposable } = registerAdapter());
+    ({ adapter, sassAdapter, disposable } = registerAdapter());
   });
 
   afterEach(async () => {
@@ -75,6 +98,62 @@ describe("ide-css adapter", () => {
     const launch = await adapter.resolveServer({ rootPath: __dirname });
     expect(launch.cwd).toBe(__dirname);
     expect(launch.transport).toBe("stdio");
+  });
+
+  it("registers indented Sass with its own native server and shared feature switches", async () => {
+    expect(sassAdapter.id).toBe("ide-css-sass");
+    expect(sassAdapter.grammarScopes).toEqual(["source.sass"]);
+    expect(sassAdapter.languageId).toBe("sass");
+    expect(sassAdapter.featuresKeyPath).toBe("ide-css.features");
+    expect(adapter.featuresKeyPath).toBe(sassAdapter.featuresKeyPath);
+    expect(sassAdapter.restartKeyPaths).toEqual(["ide-css.sassServerPath"]);
+    expect(sassAdapter.managedServer.packages).toEqual(["some-sass-language-server"]);
+    const launch = await sassAdapter.resolveServer({ rootPath: __dirname });
+    expect(launch.cwd).toBe(__dirname);
+    expect(launch.transport).toBe("stdio");
+    expect(launch.args[0]).not.toBe((await adapter.resolveServer({ rootPath: __dirname })).args[0]);
+  });
+
+  it("forwards Sass validation, completion and documentation settings", () => {
+    lumine.config.set("ide-css.completion.triggerPropertyValueCompletion", false);
+    lumine.config.set("ide-css.hover.references", false);
+    lumine.config.set("ide-css.lint.unknownProperties", "error");
+    const settings = sassAdapter.getWorkspaceConfiguration("somesass").sass;
+    expect(settings.diagnostics.enabled).toBe(true);
+    expect(settings.diagnostics.lint.unknownProperties).toBe("error");
+    expect(settings.completion.triggerPropertyValueCompletion).toBe(false);
+    expect(settings.hover.references).toBe(false);
+    expect(sassAdapter.getSettings().somesass.sass).toEqual(settings);
+    expect(sassAdapter.getWorkspaceConfiguration("editor")).toEqual({});
+    lumine.config.set("ide-css.languages.sass", false);
+    expect(sassAdapter.getWorkspaceConfiguration("somesass").sass.diagnostics.enabled).toBe(false);
+  });
+
+  it("disposes every registered adapter when its service edge disappears", () => {
+    const disposed = [];
+    const main = lumine.packages.getActivePackage("ide-css").mainModule;
+    const registration = main.consumeIdeClient({
+      registerAdapter(registered) {
+        return { dispose: () => disposed.push(registered.id) };
+      },
+    });
+    registration.dispose();
+    registration.dispose();
+    expect(disposed).toEqual(["ide-css", "ide-css-sass"]);
+  });
+
+  it("cleans up the first registration if the second server cannot register", () => {
+    const disposed = jasmine.createSpy("dispose");
+    const main = lumine.packages.getActivePackage("ide-css").mainModule;
+    expect(() =>
+      main.consumeIdeClient({
+        registerAdapter(registered) {
+          if (registered.id === "ide-css-sass") throw new Error("registration failed");
+          return { dispose: disposed };
+        },
+      }),
+    ).toThrowError("registration failed");
+    expect(disposed).toHaveBeenCalledTimes(1);
   });
 
   it("declares supported URI schemes, custom data, and the static formatter capability", () => {
@@ -132,6 +211,9 @@ describe("ide-css adapter", () => {
     expect(adapter.getSettings().css.validate).toBe(false);
     expect(adapter.getSettings().scss.validate).toBe(true);
     expect(adapter.getSettings().less.validate).toBe(false);
+    expect(sassAdapter.getSettings().somesass.sass.diagnostics.enabled).toBe(false);
+    lumine.config.set("ide-css.features.diagnostics", true, { scopeSelector: ".source.sass" });
+    expect(sassAdapter.getSettings().somesass.sass.diagnostics.enabled).toBe(true);
   });
 
   it("offers switches for exactly the capabilities consumed by the editor", () => {
