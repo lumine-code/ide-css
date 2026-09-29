@@ -1,18 +1,18 @@
 # ide-css
 
-CSS, SCSS, Sass and Less language-server adapter.
+CSS, SCSS and Less language-server adapter.
 
-Registers the CSS server from [vscode-langservers-extracted](https://github.com/hrsh7th/vscode-langservers-extracted) and the indented Sass server from [Some Sass](https://github.com/wkillerud/some-sass) with the `ide-client` package, providing completion, validation, documentation, navigation, refactoring, colors, links, quick fixes, folding, and selection ranges for stylesheets.
+Registers the CSS server from [vscode-langservers-extracted](https://github.com/hrsh7th/vscode-langservers-extracted) with the `ide-client` package, providing completion, validation, documentation, navigation, refactoring, colors, links, quick fixes, folding, selection ranges, and formatting for stylesheets.
 
 ## Features
 
-- **Bundled servers**: ships exact server versions, with optional custom executable paths.
+- **Bundled server**: ships an exact server version, with an optional custom executable path.
 - **Managed upgrade**: installs a newer server from npm when you want one, and removing it returns to the bundled copy.
-- **Four syntaxes**: serves CSS, SCSS, Sass and Less with their native protocol language IDs, using a separate server for indented Sass.
-- **Custom data**: loads project-defined properties, at-rules, pseudo-classes, and pseudo-elements for CSS, SCSS and Less from custom-data files or URLs.
-- **Validation and fixes**: reports syntax and configurable lint problems through LSP diagnostics and offers property-name quick fixes.
+- **Three syntaxes**: serves CSS, SCSS and Less with their native protocol language IDs.
+- **Custom data**: loads project-defined properties, at-rules, pseudo-classes, and pseudo-elements from CSS custom-data files or URLs.
+- **Validation and fixes**: reports syntax and configurable lint problems through LSP pull diagnostics and offers property-name quick fixes.
 - **Navigation and refactoring**: finds definitions and references and renames variables or custom properties.
-- **Document tools**: provides symbols, outline data, import links, colors, highlights, folding, selection ranges, and CSS, SCSS and Less formatting.
+- **Document tools**: provides symbols, outline data, import links, colors, highlights, folding, selection ranges, and formatting.
 - **Feature switches**: each editor-facing capability can be handed to another language server serving the same file.
 - **Project sessions**: one server per project root, started lazily with the first supported stylesheet editor.
 
@@ -24,7 +24,7 @@ Install `ide-client` first.
 
 ## Usage
 
-Indented Sass uses Some Sass with the native `sass` language ID. Property completions preserve indentation and omit semicolons. Both servers share the package's feature switches, and each has its own bundled fallback and managed upgrade. The Sass server does not provide formatting.
+Indented Sass (`.sass`) is provided by the separate `ide-sass` package. `ide-css` continues to serve CSS, SCSS and Less, including their formatting.
 
 CSS inside HTML is served by `ide-html`. CSS inside JavaScript template strings is outside this adapter's scope.
 

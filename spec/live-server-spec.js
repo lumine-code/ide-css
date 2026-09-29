@@ -3,12 +3,12 @@ const os = require("os");
 const path = require("path");
 const { LiveLspClient, fileUri, position, positionParams } = require("./helpers/live-lsp-client");
 
-const registerAdapter = (id = "ide-css") => {
+const registerAdapter = () => {
   let adapter;
   const main = lumine.packages.getActivePackage("ide-css").mainModule;
   const disposable = main.consumeIdeClient({
     registerAdapter(registered) {
-      if (registered.id === id) adapter = registered;
+      adapter = registered;
       return { dispose() {} };
     },
     getSessions: () => [],
@@ -262,119 +262,15 @@ describe("ide-css bundled server", () => {
     });
     expect(diagnostics.items).toEqual([]);
   });
-
-  it("completes indented Sass with its native server and original document positions", async () => {
-    disposable.dispose();
-    ({ adapter, disposable } = registerAdapter("ide-css-sass"));
-    client = new LiveLspClient(adapter, rootPath);
-    const source = "$brand: #ff0000\n.card\n  disp\n  color: $br\n";
-    const uri = fileUri(path.join(rootPath, "fixture.sass"));
-    fs.writeFileSync(path.join(rootPath, "fixture.sass"), source);
-    const { capabilities } = await client.start();
-    client.open(uri, "sass", source);
-    expect(capabilities.documentFormattingProvider).toBeUndefined();
-    expect(capabilities.documentRangeFormattingProvider).toBeUndefined();
-
-    const properties = await client.request("textDocument/completion", positionParams(uri, 2, 6));
-    const display = properties.items.find(({ label }) => label === "display");
-    expect(display.textEdit.range).toEqual({ start: position(2, 2), end: position(2, 6) });
-    expect(display.textEdit.newText).toBe("display: $0");
-    expect(display.insertTextFormat).toBe(2);
-    expect(display.command.command).toBe("editor.action.triggerSuggest");
-    expect(display.documentation.value).toContain("MDN Reference");
-
-    const variables = await client.request("textDocument/completion", positionParams(uri, 3, 12));
-    expect(variables.items.map(({ label }) => label)).toContain("$brand");
-
-    client.change(uri, "$brand: #ff0000\n.card\n  display: gr\n  color: $brand\n");
-    const values = await client.request("textDocument/completion", positionParams(uri, 2, 13));
-    const grid = values.items.find(({ label }) => label === "grid");
-    expect(grid.textEdit.newText).toBe("grid");
-    const definition = await client.request("textDocument/definition", positionParams(uri, 3, 12));
-    expect(definition.range.start.line).toBe(0);
-
-    client.change(uri, ".card:ho\n  color: red\n", 3);
-    const pseudo = await client.request("textDocument/completion", positionParams(uri, 0, 8));
-    expect(pseudo.items.map(({ label }) => label)).toContain(":hover");
-
-    const mixinSource = [
-      "@mixin card($color, $padding: 1rem)",
-      "  color: $color",
-      ".card",
-      "  @include card(red, )",
-      "",
-    ];
-    client.change(uri, mixinSource.join("\n"), 4);
-    expect(capabilities.signatureHelpProvider).toBeDefined();
-    const signature = await client.request(
-      "textDocument/signatureHelp",
-      positionParams(uri, 3, mixinSource[3].indexOf(")")),
-    );
-    expect(signature.signatures[0].label).toBe("card($color, $padding: 1rem)");
-    expect(signature.activeParameter).toBe(1);
-  });
-
-  it("validates Sass at its original ranges and clears resolved problems", async () => {
-    disposable.dispose();
-    ({ adapter, disposable } = registerAdapter("ide-css-sass"));
-    client = new LiveLspClient(adapter, rootPath);
-    const uri = fileUri(path.join(rootPath, "invalid.sass"));
-    const source = ".card\n  colr: red\n";
-    fs.writeFileSync(path.join(rootPath, "invalid.sass"), source);
+  it("completes an unsaved CSS document with an untitled URI", async () => {
+    const uri = "untitled:lumine-css.css";
     await client.start();
-    client.open(uri, "sass", source);
-    const published = await client.waitFor(
-      () =>
-        client
-          .messages("textDocument/publishDiagnostics")
-          .find(({ params }) => params.uri === uri && params.diagnostics.length),
-      "Sass diagnostics",
-    );
-    const unknown = published.params.diagnostics.find(({ code }) => code === "unknownProperties");
-    expect(unknown.range).toEqual({ start: position(1, 2), end: position(1, 6) });
-    expect(unknown.source).toBe("sass");
-
-    client.change(uri, source.replace("colr:", "color:"));
-    await client.waitFor(
-      () =>
-        client
-          .messages("textDocument/publishDiagnostics")
-          .find(({ params }) => params.uri === uri && params.diagnostics.length === 0),
-      "Resolved Sass diagnostics",
-    );
+    client.open(uri, "css", ".card {\n  disp\n}\n");
+    const properties = await client.request("textDocument/completion", positionParams(uri, 1, 6));
+    expect(properties?.items?.map(({ label }) => label) || []).toContain("display");
+    client.change(uri, ".card {\n  display: gr;\n}\n");
+    const values = await client.request("textDocument/completion", positionParams(uri, 1, 13));
+    expect(values?.items?.map(({ label }) => label) || []).toContain("grid");
+    expect(fs.readdirSync(rootPath)).toEqual([]);
   });
-
-  for (const syntax of [
-    {
-      name: "CSS",
-      adapterId: "ide-css",
-      languageId: "css",
-      propertySource: ".card {\n  disp\n}\n",
-      valueSource: ".card {\n  display: gr;\n}\n",
-    },
-    {
-      name: "Sass",
-      adapterId: "ide-css-sass",
-      languageId: "sass",
-      propertySource: ".card\n  disp\n",
-      valueSource: ".card\n  display: gr\n",
-    },
-  ]) {
-    it(`completes an unsaved ${syntax.name} document with an untitled URI`, async () => {
-      disposable.dispose();
-      ({ adapter, disposable } = registerAdapter(syntax.adapterId));
-      client = new LiveLspClient(adapter, rootPath);
-      const uri = `untitled:lumine-${syntax.languageId}.${syntax.languageId}`;
-      await client.start();
-      client.open(uri, syntax.languageId, syntax.propertySource);
-
-      const properties = await client.request("textDocument/completion", positionParams(uri, 1, 6));
-      expect(properties?.items?.map(({ label }) => label) || []).toContain("display");
-
-      client.change(uri, syntax.valueSource);
-      const values = await client.request("textDocument/completion", positionParams(uri, 1, 13));
-      expect(values?.items?.map(({ label }) => label) || []).toContain("grid");
-      expect(fs.readdirSync(rootPath)).toEqual([]);
-    });
-  }
 });

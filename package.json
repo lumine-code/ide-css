@@ -1,7 +1,7 @@
 {
   "name": "ide-css",
   "author": "lumine-code",
-  "description": "CSS, SCSS, Sass and Less language-server adapter.",
+  "description": "CSS, SCSS and Less language-server adapter.",
   "repository": "https://github.com/lumine-code/ide-css",
   "bugs": {
     "url": "https://github.com/lumine-code/ide-css/issues"
@@ -11,7 +11,6 @@
     "lsp",
     "stylesheet",
     "scss",
-    "sass",
     "less",
     "web",
     "intellisense"
@@ -40,7 +39,6 @@
     }
   },
   "dependencies": {
-    "some-sass-language-server": "2.3.8",
     "vscode-langservers-extracted": "4.10.0"
   },
   "devDependencies": {
@@ -59,15 +57,9 @@
       "type": "string",
       "default": ""
     },
-    "sassServerPath": {
-      "title": "Sass Server Path",
-      "description": "Absolute path to a `some-sass-language-server` executable for indented Sass. Leave empty to use the bundled server.",
-      "type": "string",
-      "default": ""
-    },
     "customData": {
       "title": "Custom Data",
-      "description": "Custom-data files or URLs for CSS, SCSS and Less that describe additional properties, at-rules, pseudo-classes and pseudo-elements. Relative paths are resolved from the project root.",
+      "description": "CSS custom-data files or URLs that describe additional properties, at-rules, pseudo-classes and pseudo-elements. Relative paths are resolved from the project root.",
       "type": "array",
       "items": {
         "type": "string"
@@ -97,13 +89,6 @@
         "hover": {
           "title": "Hover",
           "description": "Show CSS documentation and browser information on hover.",
-          "scopeResolution": "grammar",
-          "type": "boolean",
-          "default": true
-        },
-        "signature": {
-          "title": "Signature Help",
-          "description": "Show parameter hints for Sass functions and mixins.",
           "scopeResolution": "grammar",
           "type": "boolean",
           "default": true
@@ -166,12 +151,6 @@
         "scss": {
           "title": "Validate SCSS",
           "description": "Report syntax and lint diagnostics in SCSS files.",
-          "type": "boolean",
-          "default": true
-        },
-        "sass": {
-          "title": "Validate Sass",
-          "description": "Report syntax and lint diagnostics in indented Sass files.",
           "type": "boolean",
           "default": true
         },
