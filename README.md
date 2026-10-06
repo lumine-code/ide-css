@@ -2,7 +2,7 @@
 
 CSS, SCSS and Less language-server adapter.
 
-Registers the CSS server from [vscode-langservers-extracted](https://github.com/hrsh7th/vscode-langservers-extracted) with the `ide-client` package, providing completion, validation, documentation, navigation, refactoring, colors, links, quick fixes, folding, selection ranges, and formatting for stylesheets.
+Registers the CSS server from [vscode-langservers-extracted](https://github.com/hrsh7th/vscode-langservers-extracted) with the `ide` package, providing completion, validation, documentation, navigation, refactoring, colors, links, quick fixes, folding, selection ranges, and formatting for stylesheets.
 
 ## Features
 
@@ -20,7 +20,7 @@ Registers the CSS server from [vscode-langservers-extracted](https://github.com/
 
 To install `ide-css` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/ide-css`.
 
-Install `ide-client` first.
+Install `ide` first.
 
 ## Usage
 
@@ -30,7 +30,7 @@ CSS inside HTML is served by `ide-html`. CSS inside JavaScript template strings 
 
 ## Services
 
-- `ide-client`: consumed to register the stylesheet adapter with the editor's language-server client.
+- `ide`: consumed to register the stylesheet adapter with the editor's language-server client.
 
 ## Contributing
 
