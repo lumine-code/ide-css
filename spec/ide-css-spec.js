@@ -103,7 +103,7 @@ describe("ide-css adapter", () => {
     lumine.config.set("ide-css.lint.validProperties", ["custom-prop"]);
     lumine.config.set("ide-css.languages.scss", false);
 
-    const css = adapter.getWorkspaceConfiguration("css");
+    const css = adapter.getSettings().css;
     expect(css.validate).toBe(true);
     expect(css.completion.completePropertyWithSemicolon).toBe(false);
     expect(css.hover.references).toBe(false);
@@ -111,10 +111,9 @@ describe("ide-css adapter", () => {
     expect(css.lint.hexColorLength).toBe("error");
     expect(css.lint.propertyIgnoredDueToDisplay).toBe("warning");
     expect(css.lint.validProperties).toEqual(["custom-prop"]);
-    expect(adapter.getWorkspaceConfiguration("scss").validate).toBe(false);
-    expect(adapter.getWorkspaceConfiguration("less").validate).toBe(true);
-    expect(adapter.getWorkspaceConfiguration()).toEqual(adapter.getSettings());
-    expect(adapter.getWorkspaceConfiguration("unknown")).toBeUndefined();
+    expect(adapter.getSettings().scss.validate).toBe(false);
+    expect(adapter.getSettings().less.validate).toBe(true);
+    expect(adapter.getWorkspaceConfiguration).toBeUndefined();
   });
 
   it("turns all three validators off with the diagnostics feature", () => {
