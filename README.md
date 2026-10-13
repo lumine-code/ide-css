@@ -16,6 +16,8 @@ Registers the CSS server from [vscode-langservers-extracted](https://github.com/
 - **Feature switches**: each editor-facing capability can be handed to another language server serving the same file.
 - **Project sessions**: one server per project root, started lazily with the first supported stylesheet editor.
 
+![The CSS language server flags a misspelled property.](.github/demo.png)
+
 ## Installation
 
 To install `ide-css` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/ide-css`.

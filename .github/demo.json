@@ -1,0 +1,16 @@
+{
+  "title": "ide-css",
+  "description": "The CSS language server flags a misspelled property.",
+  "recordedOn": "2026-10-13",
+  "sourceRevision": "903639e7723a0bfa879423211e9ca89f9fd28f33",
+  "mode": "normal",
+  "fontSettings": "default",
+  "images": [
+    {
+      "file": "demo.png",
+      "label": "The CSS language server flags a misspelled property.",
+      "width": 1100,
+      "height": 490
+    }
+  ]
+}
