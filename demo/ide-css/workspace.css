@@ -1,0 +1,13 @@
+.workspace {
+  display: grid;
+  grid-template-columns: 16rem 1fr;
+  gap: 24px;
+  padding: 32px;
+  colour: #333333;
+  background: #f2f1ee;
+}
+
+.workspace a {
+  color: #cf9723;
+  text-decoration: none;
+}
